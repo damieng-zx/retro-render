@@ -4,6 +4,7 @@ import { SpectrumScreen } from "./Spectrum/Screen";
 import { NEOchrome } from "./AtariST/NeoChrome";
 import { Spectrum512 } from "./AtariST/Spectrum512";
 import { Spectrum512Compressed } from "./AtariST/Spectrum512Compressed";
+import { Degas } from "./AtariST/Degas";
 import { ILBM } from "./Amiga/ILBM";
 
 export enum Format {
@@ -11,6 +12,7 @@ export enum Format {
     NEOchrome,
     Spectrum512,
     Spectrum512Compressed,
+    Degas,
     ILBM
 }
 
@@ -19,6 +21,7 @@ const allRenderers = new Map<Format, ImageFileFormat>([
     [Format.NEOchrome, new NEOchrome()],
     [Format.Spectrum512, new Spectrum512()],
     [Format.Spectrum512Compressed, new Spectrum512Compressed()],
+    [Format.Degas, new Degas()],
     [Format.ILBM, new ILBM()]
 ]);
 
@@ -48,7 +51,15 @@ export function GetRenderer(buffer: ArrayBuffer): ImageFileFormat {
             return getRendererFor(Format.NEOchrome);
         case 51104: // Spectrum 512
             return getRendererFor(Format.Spectrum512);
-        default:
-            throw new Error(`Unrecognised file of ${buffer.byteLength} bytes. Supported: .scr 6144/6912, .neo 32128/128128, .spu 51104, .spc, and IFF ILBM/PBM (.iff, .ilbm, .lbm).`);
+        case 32034: // DEGAS raw, 34-byte header + screen
+        case 32066: // DEGAS raw with the colour-cycling trailer
+            return getRendererFor(Format.Degas);
     }
+
+    // Compressed DEGAS (.pc1-.pc3) has no magic and no fixed size, so it is
+    // only considered once the formats above have been ruled out.
+    if (Degas.IsCompressedFile(buffer))
+        return getRendererFor(Format.Degas);
+
+    throw new Error(`Unrecognised file of ${buffer.byteLength} bytes. Supported: .scr 6144/6912, .neo 32128/128128, .spu 51104, .spc, .pi*/.pc*, and IFF ILBM/PBM (.iff, .ilbm, .lbm).`);
 }

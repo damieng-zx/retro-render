@@ -10,6 +10,7 @@ Supported formats:
 | Atari ST NEOchrome | `.neo` | 32128 bytes (low/medium/high) or 128128 bytes (640×400 virtual canvas, flag `0xBABE`) |
 | Atari ST Spectrum 512 | `.spu` | 51104 bytes (320×200, 48 colours per scanline) |
 | Atari ST Spectrum 512 compressed | `.spc` | RLE-compressed `.spu` with an `SP` header |
+| Atari ST DEGAS / DEGAS Elite | `.pi1`–`.pi3`, `.pc1`–`.pc3` | 32034 bytes raw (low/medium/high) or 32066 with the colour-cycling trailer; `.pc*` is PackBits compressed |
 | Amiga IFF ILBM / PBM | `.iff`, `.ilbm`, `.lbm`, `.pbm` | any size; dimensions come from the `BMHD` chunk |
 
 ### Amiga IFF ILBM
