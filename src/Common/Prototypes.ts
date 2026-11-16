@@ -8,7 +8,7 @@ String.prototype.score =
         if (String(this) === e) return 1;
         if ("" === e) return 0;
         var d = 0, a, g = this.toLowerCase(), n = this.length, h = e.toLowerCase(), k = e.length, b; a = 0;
-        var l = 1, m, c;
+        var l = 1, m = 0, c;
         f && (m = 1 - f);
         if (f)
             for (c = 0; c < k; c += 1)

@@ -7,6 +7,6 @@ export interface FileFormat {
 }
 
 export interface ImageFileFormat extends FileFormat {
-    GetImageDefinition(buffer: ArrayBuffer): ImageDefinition;
+    GetImageDefinition(buffer: ArrayBuffer): ImageDefinition | null;
     RenderToImageData(screen: ArrayBuffer, imageData: ImageData): void;
 }

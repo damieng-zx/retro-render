@@ -19,7 +19,7 @@ export class SpectrumScreen implements ImageFileFormat {
         return new Map();
     }
 
-    public GetImageDefinition(buffer: ArrayBuffer): ImageDefinition {
+    public GetImageDefinition(buffer: ArrayBuffer): ImageDefinition | null {
         switch (buffer.byteLength) {
             case 6912:
                 return Spectrum.DisplayResolution;

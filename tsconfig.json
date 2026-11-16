@@ -8,9 +8,8 @@
     "rootDir": "src",
     "declaration": true,
     "removeComments": true,
+    "strict": true,
     "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noImplicitAny": true,
     "types": []
   },
   "exclude": ["node_modules", "dist"],
