@@ -8,6 +8,10 @@ export class AtariST {
     public static readonly MediumResolution = new ImageDefinition(640, 200, 4);
     public static readonly HighResolution = new ImageDefinition(640, 400, 2);
 
+    // Used by the NEOchrome "virtual canvas" variant (flag 0xBABE), which
+    // stores a 640x400 image in 16 colours at the normal low-res bit depth.
+    public static readonly VirtualCanvasResolution = new ImageDefinition(640, 400, 16);
+
     public static GetImageDefinition(resolution: Resolution): ImageDefinition {
         switch (resolution) {
             case Resolution.Low: return AtariST.LowResolution;

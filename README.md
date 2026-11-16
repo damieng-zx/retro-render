@@ -7,7 +7,7 @@ Supported formats:
 | Format | Extension | Sizes |
 | --- | --- | --- |
 | ZX Spectrum screen | `.scr` | 6912 bytes (colour, 256×192) or 6144 bytes (mono bitmap) |
-| Atari ST NEOchrome | `.neo` | 32128 bytes (low, medium and high resolution) |
+| Atari ST NEOchrome | `.neo` | 32128 bytes (low/medium/high) or 128128 bytes (640×400 virtual canvas, flag `0xBABE`) |
 | Atari ST Spectrum 512 | `.spu` | 51104 bytes (320×200, 48 colours per scanline) |
 | Atari ST Spectrum 512 compressed | `.spc` | RLE-compressed `.spu` with an `SP` header |
 | Amiga IFF ILBM / PBM | `.iff`, `.ilbm`, `.lbm`, `.pbm` | any size; dimensions come from the `BMHD` chunk |

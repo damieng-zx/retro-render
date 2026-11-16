@@ -39,6 +39,8 @@ const offsetChecks = new Array<OffsetCheck>(
 )
 
 export class NEOchrome implements ImageFileFormat {
+    private static readonly VirtualCanvasFlag = 0xbabe;
+
     public GetFileExtensions(): string[] {
         return ['.neo'];
     }
@@ -47,7 +49,10 @@ export class NEOchrome implements ImageFileFormat {
         const dv = new DataView(buffer);
 
         let score = 0;
-        if (dv.byteLength === 32128) score += 10;
+        if (dv.byteLength === 32128)
+            score += 10;
+        else if (dv.byteLength === 128128 && dv.getUint16(Offset.Flag) === NEOchrome.VirtualCanvasFlag)
+            score += 10;
 
         for (let check of offsetChecks)
             if (check.test(dv.getInt16(check.offset)))
@@ -68,6 +73,8 @@ export class NEOchrome implements ImageFileFormat {
             palette.push(dv.getInt16(Offset.Palette + i * 2).toString(2));
 
         map.set('flag', dv.getUint16(Offset.Flag).toString(16));
+        if (dv.getUint16(Offset.Flag) === NEOchrome.VirtualCanvasFlag)
+            map.set('canvas', 'virtual');
         map.set('resolution', Resolution[dv.getUint16(Offset.Resolution)]);
         map.set('palette', palette.join(', '));
         map.set('filename', dv.getAsciiFixed(Offset.Filename, 12));
@@ -82,17 +89,32 @@ export class NEOchrome implements ImageFileFormat {
 
     public GetImageDefinition(buffer: ArrayBuffer): ImageDefinition | null {
         const dv = new DataView(buffer);
-        if (dv.getUint16(Offset.Flag) !== 0) return null;
+        const flag = dv.getUint16(Offset.Flag);
+
+        if (flag === NEOchrome.VirtualCanvasFlag)
+            return buffer.byteLength === 128128 ? AtariST.VirtualCanvasResolution : null;
+
+        if (flag !== 0 || buffer.byteLength !== 32128) return null;
         return AtariST.GetImageDefinition(dv.getInt16(Offset.Resolution));
     }
 
     public RenderToImageData(buffer: ArrayBuffer, imageData: ImageData): void {
         const dv = new DataView(buffer);
 
-        if (dv.getUint8(0) !== 0)
-            throw new Error('Missing flag byte 0x00 at 0x00');
+        const flag = dv.getUint16(Offset.Flag);
+        const virtualCanvas = flag === NEOchrome.VirtualCanvasFlag;
 
-        const mode = <Resolution>dv.getInt16(Offset.Resolution);
+        if (!virtualCanvas && flag !== 0)
+            throw new Error(`Unsupported NEOchrome flag 0x${flag.toString(16)} at 0x00`);
+        if (!virtualCanvas && buffer.byteLength === 128128)
+            throw new Error("NEOchrome virtual canvas is missing its 0xBABE flag");
+        if (virtualCanvas && buffer.byteLength !== 128128)
+            throw new Error(`NEOchrome virtual canvas is ${buffer.byteLength} bytes but should be 128128`);
+        if (!virtualCanvas && buffer.byteLength !== 32128)
+            throw new Error(`NEOchrome is ${buffer.byteLength} bytes but should be 32128`);
+
+        // The virtual canvas is a plain 640x400 image at low-res bit depth.
+        const mode = virtualCanvas ? Resolution.Low : <Resolution>dv.getInt16(Offset.Resolution);
         const def = AtariST.GetImageDefinition(mode);
         const pal = AtariST.GetPalette(buffer.slice(Offset.Palette, 16 * 2 + 4), def.colors);
 

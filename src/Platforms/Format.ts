@@ -44,10 +44,11 @@ export function GetRenderer(buffer: ArrayBuffer): ImageFileFormat {
         case 6144:  // Spectrum bitmap-only screen$
             return getRendererFor(Format.SpectrumScreen);
         case 32128: // NEOchrome
+        case 128128: // NEOchrome virtual canvas (flag 0xBABE, 640x400)
             return getRendererFor(Format.NEOchrome);
         case 51104: // Spectrum 512
             return getRendererFor(Format.Spectrum512);
         default:
-            throw new Error(`Unrecognised file of ${buffer.byteLength} bytes. Expected 6144 or 6912 (.scr), 32128 (.neo), 51104 (.spu), a Spectrum 512 compressed (.spc) or an IFF ILBM/PBM (.iff, .ilbm, .lbm).`);
+            throw new Error(`Unrecognised file of ${buffer.byteLength} bytes. Supported: .scr 6144/6912, .neo 32128/128128, .spu 51104, .spc, and IFF ILBM/PBM (.iff, .ilbm, .lbm).`);
     }
 }
