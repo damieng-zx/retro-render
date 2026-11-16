@@ -14,9 +14,9 @@ export class Color {
                 throw new Error('Argument a must be between 0 and 255');
     }
 
-    public toStyle(): string {        
-        return this.a === 1
+    public toStyle(): string {
+        return this.a === 255
             ? `rgb(${this.r}, ${this.g}, ${this.b})`
-            : `rgb(${this.r}, ${this.g}, ${this.b}), ${this.a})`;
+            : `rgba(${this.r}, ${this.g}, ${this.b}, ${(this.a / 255).toFixed(3)})`;
     }
 }
