@@ -83,7 +83,7 @@ export class NEOchrome implements ImageFileFormat {
     public GetImageDefinition(buffer: ArrayBuffer): ImageDefinition | null {
         const dv = new DataView(buffer);
         if (dv.getUint16(Offset.Flag) !== 0) return null;
-        return AtariST.GetImageDefinition(dv.getInt16(2));
+        return AtariST.GetImageDefinition(dv.getInt16(Offset.Resolution));
     }
 
     public RenderToImageData(buffer: ArrayBuffer, imageData: ImageData): void {
