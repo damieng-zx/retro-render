@@ -19,6 +19,13 @@ export class Spectrum {
     public static readonly AttributeResolution = new ImageDefinition(32, 24, 16);
     public static readonly AttributeOffset = 6144;
 
+    // A 6144-byte screen is a bitmap with no attribute area: bit clear is the
+    // paper, bit set is the ink.
+    public static readonly MonoColors = [
+        new Color(0, 0, 0),
+        new Color(0xff, 0xff, 0xff)
+    ];
+
     public static GetImageDefinition(resolution: Resolution): ImageDefinition {
         switch (resolution) {
             case Resolution.Standard: return Spectrum.PixelResolution;

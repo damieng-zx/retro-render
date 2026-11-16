@@ -31,10 +31,11 @@ export class SpectrumScreen implements ImageFileFormat {
     }
 
     public RenderToImageData(buffer: ArrayBuffer, imageData: ImageData): void {
-        if (buffer.byteLength !== 6912 && buffer.byteLength !== 6144)
+        const mono = buffer.byteLength === 6144;
+        if (!mono && buffer.byteLength !== 6912)
             throw new Error('Only 6912 color and 6144 mono screen$ supported');
 
-        this.DrawScreen(buffer, (x, y, color) => {
+        this.DrawScreen(buffer, mono, (x, y, color) => {
             const offset = (x + y * imageData.width) * 4;
             imageData.data[offset] = color.r;
             imageData.data[offset + 1] = color.g;
@@ -43,7 +44,7 @@ export class SpectrumScreen implements ImageFileFormat {
         });
     }
 
-    private DrawScreen(buffer: ArrayBuffer, setter: (x: number, y: number, c: Color) => void): void {
+    private DrawScreen(buffer: ArrayBuffer, mono: boolean, setter: (x: number, y: number, c: Color) => void): void {
         const screen = new Uint8Array(buffer);
         const heightCells = Spectrum.AttributeResolution.height;
         const widthCells = Spectrum.AttributeResolution.width;
@@ -52,8 +53,11 @@ export class SpectrumScreen implements ImageFileFormat {
 
         for (let cellY = 0; cellY < heightCells; cellY++) {
             for (let cellX = 0; cellX < widthCells; cellX++) {
-                const attribute = screen[cellY * widthCells + attributeOffset + cellX];
-                const colors = Spectrum.GetAttributeColors(attribute);
+                // Mono screens have no attributes; reading past the bitmap used
+                // to yield undefined, which made every pixel black.
+                const colors = mono
+                    ? Spectrum.MonoColors
+                    : Spectrum.GetAttributeColors(screen[cellY * widthCells + attributeOffset + cellX]);
                 for (let pixelY = 0; pixelY < 8; pixelY++) {
                     const y = (cellY * 8) + pixelY;
                     const pixels = screen[lookupY[y] + cellX];
