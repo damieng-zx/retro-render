@@ -7,5 +7,5 @@ export function getRenderer(buffer: ArrayBuffer): ImageFileFormat {
 
 export async function getAsTextLines(url: string): Promise<Array<string>> {
     const text = await getPlainText(url);
-    return text.split('\n').map(t => t.trim());
+    return text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
 }

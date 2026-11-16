@@ -1,25 +1,29 @@
 
 async function getPlainText(uri: string): Promise<string> {
-    const request = new Request(uri, {
-        headers: new Headers({ 'Content-Type': 'text/plain' })
+    const response = await fetch(uri, {
+        headers: new Headers({ 'Accept': 'text/plain' })
     });
 
-    const response = await fetch(request);
+    if (!response.ok)
+        throw new Error(`Unable to fetch ${uri}: ${response.status} ${response.statusText}`);
+
     return response.text();
 }
 
 async function getBinary(uri: string): Promise<ArrayBuffer> {
-    const request = new Request(uri, {
-        headers: new Headers({ 'Content-Type': 'application/octet-stream' })
+    const response = await fetch(uri, {
+        headers: new Headers({ 'Accept': 'application/octet-stream' })
     });
 
-    const response = await fetch(request);
+    if (!response.ok)
+        throw new Error(`Unable to fetch ${uri}: ${response.status} ${response.statusText}`);
+
     return response.arrayBuffer();
 }
 
-function createText(tag: string, text?:string): Node {
+function createText(tag: string, text?: string): Node {
     if (tag === '')
-        return document.createTextNode(text);
+        return document.createTextNode(text ?? '');
 
     const element = document.createElement(tag);
     if (text)
