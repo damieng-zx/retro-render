@@ -64,7 +64,7 @@ export class NEOchrome implements ImageFileFormat {
         const map = new Map<string, string>();
 
         const palette = [];
-        for (let i = 0; i < 15; i++)
+        for (let i = 0; i < 16; i++)
             palette.push(dv.getInt16(Offset.Palette + i * 2).toString(2));
 
         map.set('flag', dv.getUint16(Offset.Flag).toString(16));
