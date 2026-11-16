@@ -1,49 +1,65 @@
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
     <title>Screen Renders</title>
-    <link href="https://fonts.googleapis.com/css?family=Fira+Sans+Condensed:400,700" rel="stylesheet">
-    <link href="main.css" rel="stylesheet">
-</head>
+    <link
+      href="https://fonts.googleapis.com/css?family=Fira+Sans+Condensed:400,700"
+      rel="stylesheet"
+    />
+    <link
+      href="main.css"
+      rel="stylesheet"
+    />
+  </head>
 
-<body>
+  <body>
     <header>
-        <div id="logo">
-            <h1>Retro Renders</h1>
-            <p id="strapline">Canvas rendering of retro file formats.</p>
-        </div>
-        <fieldset>
-            <legend>Direct</legend>
-            <label>URL
-                <input type="text" id="url" value="/samples/newteks.spu" />
-            </label>
-            <button id="renderUrl">Render</button>
-        </fieldset>
-        <fieldset>
-            <legend>Debug</legend>
-            <button id="renderSamples">Render Samples</button>
-        </fieldset>
-        <fieldset>
-            <legend>Filtered</legend>
-            <label>Text
-                <input type="search" id="filter" placeholder="dizzy" />
-            </label>
-        </fieldset>
-        <fieldset>
-            <legend>Results</legend>
-            <span id="matchCount">0</span> fuzzy matches, showing top
-            <span id="displayCount"></span>.
-        </fieldset>
+      <div id="logo">
+        <h1>Retro Renders</h1>
+        <p id="strapline">Canvas rendering of retro file formats.</p>
+      </div>
+      <fieldset>
+        <legend>Direct</legend>
+        <label
+          >URL
+          <input
+            type="text"
+            id="url"
+            value="/samples/newteks.spu"
+          />
+        </label>
+        <button id="renderUrl">Render</button>
+      </fieldset>
+      <fieldset>
+        <legend>Debug</legend>
+        <button id="renderSamples">Render Samples</button>
+      </fieldset>
+      <fieldset>
+        <legend>Filtered</legend>
+        <label
+          >Text
+          <input
+            type="search"
+            id="filter"
+            placeholder="dizzy"
+          />
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>Results</legend>
+        <span id="matchCount">0</span> fuzzy matches, showing top <span id="displayCount"></span>.
+      </fieldset>
     </header>
-    <content id="output">
-    </content>
-</body>
+    <content id="output"> </content>
+  </body>
 
-<script src="../lib/system.js"></script>
-<script src="../dist/combined.js"></script>
-<script>
+  <script src="../lib/system.js"></script>
+  <script src="../dist/combined.js"></script>
+  <script>
     var byId = (id) => document.getElementById(id);
     var matchCount = byId('matchCount');
     var output = byId('output');
@@ -140,7 +156,7 @@
                 renderer.RenderToImageData(binary, imageData);
                 context.putImageData(imageData, 0, 0);
             } catch (exception) {
-                throw new Error(`Unable to render ${url}`);
+                console.error(`Unable to render ${url}`, exception);
             }
         }
 
@@ -153,6 +169,5 @@
                 );
         }
     });
-</script>
-
+  </script>
 </html>
