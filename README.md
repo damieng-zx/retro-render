@@ -9,6 +9,21 @@ Supported formats:
 | ZX Spectrum screen | `.scr` | 6912 bytes (colour, 256×192) or 6144 bytes (mono bitmap) |
 | Atari ST NEOchrome | `.neo` | 32128 bytes (low, medium and high resolution) |
 | Atari ST Spectrum 512 | `.spu` | 51104 bytes (320×200, 48 colours per scanline) |
+| Amiga IFF ILBM / PBM | `.iff`, `.ilbm`, `.lbm`, `.pbm` | any size; dimensions come from the `BMHD` chunk |
+
+### Amiga IFF ILBM
+
+ILBM is a chunked container, so it is recognised by its `FORM .... ILBM`
+(or Deluxe Paint's `PBM `) header rather than by file length. Supported:
+
+- 1-8 bitplanes with a 12-bit (OCS/ECS) or 24-bit (AGA) `CMAP` palette
+- uncompressed and ByteRun1/PackBits compressed `BODY` chunks
+- Extra Half Brite (64 colours), including files that leave out the CAMG
+  bit but have six planes and a 32-colour palette
+- HAM6 (4096 colours) and HAM8 (AGA, 8 planes)
+- mask planes are skipped and unknown chunks (`CRNG`, `DEST`, `ANNO`, ...)
+  are ignored
+
 
 ## Requirements
 

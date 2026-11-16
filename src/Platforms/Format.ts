@@ -3,17 +3,20 @@ import { ImageFileFormat } from "../Common/FileFormat";
 import { SpectrumScreen } from "./Spectrum/Screen";
 import { NEOchrome } from "./AtariST/NeoChrome";
 import { Spectrum512 } from "./AtariST/Spectrum512";
+import { ILBM } from "./Amiga/ILBM";
 
 export enum Format {
     SpectrumScreen,
     NEOchrome,
-    Spectrum512
+    Spectrum512,
+    ILBM
 }
 
 const allRenderers = new Map<Format, ImageFileFormat>([
     [Format.SpectrumScreen, new SpectrumScreen()],
     [Format.NEOchrome, new NEOchrome()],
-    [Format.Spectrum512, new Spectrum512()]
+    [Format.Spectrum512, new Spectrum512()],
+    [Format.ILBM, new ILBM()]
 ]);
 
 function getRendererFor(format: Format): ImageFileFormat {
@@ -24,6 +27,11 @@ function getRendererFor(format: Format): ImageFileFormat {
 }
 
 export function GetRenderer(buffer: ArrayBuffer): ImageFileFormat {
+    // IFF files are containers of any length, so they are recognised by their
+    // header rather than by size like the fixed-layout formats below.
+    if (ILBM.IsILBM(buffer))
+        return getRendererFor(Format.ILBM);
+
     switch (buffer.byteLength) {
         case 6912:  // Spectrum 48K screen$ (bitmap + attributes)
         case 6144:  // Spectrum bitmap-only screen$
@@ -33,6 +41,6 @@ export function GetRenderer(buffer: ArrayBuffer): ImageFileFormat {
         case 51104: // Spectrum 512
             return getRendererFor(Format.Spectrum512);
         default:
-            throw new Error(`Unrecognised file of ${buffer.byteLength} bytes. Expected 6144 or 6912 (.scr), 32128 (.neo) or 51104 (.spu).`);
+            throw new Error(`Unrecognised file of ${buffer.byteLength} bytes. Expected 6144 or 6912 (.scr), 32128 (.neo), 51104 (.spu) or an IFF ILBM/PBM (.iff, .ilbm, .lbm).`);
     }
 }
