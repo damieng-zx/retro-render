@@ -1,10 +1,11 @@
 interface String {
-    score(text: string, fuzzy: number): number;
+    score(text: string, fuzzy?: number): number;
 }
 
 String.prototype.score =
-    function (e: string, f: number) {
-        if (this === e) return 1;
+    function (this: string, e: string, f?: number): number {
+        // `this` is a boxed String in sloppy mode, so compare primitives.
+        if (String(this) === e) return 1;
         if ("" === e) return 0;
         var d = 0, a, g = this.toLowerCase(), n = this.length, h = e.toLowerCase(), k = e.length, b; a = 0;
         var l = 1, m, c;
@@ -20,12 +21,9 @@ interface Map<K, V> {
 }
 
 function GetOrCreate<K, V>(map: Map<K, V>, key: K, creator: (() => V)): V {
-    let value = map.get(key);
-    if (!value) {
-        value = creator();
-        map.set(key, value);
-    }
-    return value;
+    if (!map.has(key))
+        map.set(key, creator());
+    return map.get(key)!;
 }
 
 Map.prototype.getOrCreate =
