@@ -57,6 +57,20 @@ export class Spectrum512 implements ImageFileFormat {
 
         const palette = Spectrum512.GetPalette(buffer.slice(Offset.Palette));
 
+        // Only the first 32000 bytes are the screen; the rest is palette data.
+        // RenderLowResolution walks the whole buffer it is handed, so passing
+        // the full file would render past the image and run off the palette.
+        Spectrum512.RenderPalettedScreen(buffer.slice(0, ScreenBytes), imageData, palette);
+    }
+
+    /**
+     * Draws a 320x200 four-bitplane screen using one palette row per scanline.
+     * Shared by the uncompressed .spu renderer and the compressed .spc one.
+     */
+    public static RenderPalettedScreen(screen: ArrayBuffer, imageData: ImageData, palette: Color[]): void {
+        if (screen.byteLength !== ScreenBytes)
+            throw new Error(`Incorrect screen length of ${screen.byteLength} but expected ${ScreenBytes}`);
+
         let x = 0;
         let y = 0;
         let absIndex = 0;
@@ -69,12 +83,9 @@ export class Spectrum512 implements ImageFileFormat {
                 absIndex = y++ * ColorsPerScanline;
             }
             return palette[colorIndex];
-        }
+        };
 
-        // Only the first 32000 bytes are the screen; the rest is palette data.
-        // RenderLowResolution walks the whole buffer it is handed, so passing
-        // the full file would render past the image and run off the palette.
-        AtariST.RenderLowResolution(buffer.slice(0, ScreenBytes), imageData, getColor);
+        AtariST.RenderLowResolution(screen, imageData, getColor);
     }
 
     private static paletteSlide = [ 1, 5, 21, 25, 41, 45, 61, 65, 81, 85, 101, 105, 121, 125, 141, 145 ];
@@ -92,15 +103,22 @@ export class Spectrum512 implements ImageFileFormat {
     }
 
     public static GetPalette(buffer: ArrayBuffer): Color[] {
-        const palette = new Array<Color>();
         const dv = new DataView(buffer);
         const paletteCount = Scanlines * PalettesPerScanline * ColorsPerPalette;
-        for (let i = 0; i < paletteCount; i++) {
-            const entry = dv.getUint16(i * 2, false);
+        const words = new Uint16Array(paletteCount);
+        for (let i = 0; i < paletteCount; i++)
+            words[i] = dv.getUint16(i * 2, false);
+        return Spectrum512.ConvertPalette(words);
+    }
+
+    public static ConvertPalette(words: ArrayLike<number>): Color[] {
+        const palette = new Array<Color>(words.length);
+        for (let i = 0; i < words.length; i++) {
+            const entry = words[i];
             const red = entry >> 8 & 7;
             const green = entry >> 4 & 7;
             const blue = entry & 7;
-            palette.push(new Color(red * 32, green * 32, blue * 32));
+            palette[i] = new Color(red * 32, green * 32, blue * 32);
         }
         return palette;
     }
