@@ -62,6 +62,7 @@
   <script>
     var byId = (id) => document.getElementById(id);
     var matchCount = byId('matchCount');
+    var displayCount = byId('displayCount');
     var output = byId('output');
     var maxCount = 100;
     var threshold = 0.3;
@@ -80,21 +81,22 @@
     ];
 
     SystemJS.import('index').then(r => {
-        var dir = 'http://bitsparse.com/sinclair/screens/loading/';
+        var indexUrl = 'https://bitsparse.com/sinclair/screens/loading/';
         var filterInput = byId('filter');
         var outputContent = byId('output');
         var screenList = [];
         var loadTimer;
         var requestId = 0;
 
-        filterInput.onkeyup = () => triggerRenderFiltered();
-        byId('renderUrl').onclick = () => add(byId('url').value);
+        filterInput.oninput = () => triggerRenderFiltered();
+        byId('renderUrl').onclick = () => addToOutput(byId('url').value);
         byId('renderSamples').onclick = () => renderSamples();
         loadIndex();
 
         async function renderSamples() {
+            outputContent.innerText = '';
             for (var sample of samples)
-                await add('/samples/' + sample);
+                await addToOutput('/samples/' + sample);
         }
 
         function triggerRenderFiltered() {
@@ -107,47 +109,60 @@
 
         async function renderFiltered() {
             requestId++;
-            var filterText = filterInput.value;
-            var results = [];
-            outputContent.innerText = '';
-
             var thisRequestId = requestId;
+            var filterText = filterInput.value;
 
+            var results = [];
             for (var item of screenList) {
                 item.score = item.title.score(filterText);
                 if (item.score > threshold)
                     results.push(item);
             }
 
+            results.sort((a, b) => b.score - a.score);
+
+            outputContent.innerText = '';
             matchCount.innerText = results.length;
-            displayCount.innerText = Math.min(results.length, maxCount);
 
             var count = 0;
-            results.sort((a, b) => b.score - a.score);
-            for (var item of results) {
+            for (var result of results) {
+                if (count >= maxCount) break;
                 if (requestId !== thisRequestId) return;
-                var canvas = await add(dir + item.filename);
+
+                var canvas = await add(result.url);
                 if (requestId !== thisRequestId) return;
+                if (!canvas) continue;
+
+                canvas.title = result.title + ' score ' + result.score.toFixed(2);
                 output.appendChild(canvas);
-                canvas.title = item.title + ' score ' + item.score.toFixed(2);
                 count++;
-                if (count > maxCount) break;
             }
+
+            if (requestId === thisRequestId)
+                displayCount.innerText = count;
+        }
+
+        async function addToOutput(url) {
+            var canvas = await add(url);
+            if (canvas)
+                output.appendChild(canvas);
         }
 
         async function add(url) {
             var canvas = document.createElement('canvas');
             canvas.classList.add('screenshot');
-            await render(url, canvas);
-            return canvas;
+            var rendered = await render(url, canvas);
+            return rendered ? canvas : null;
         }
 
         async function render(url, canvas) {
-            const binary = await getBinary(url);
             try {
+                const binary = await getBinary(url);
                 const renderer = r.getRenderer(binary);
-
                 const imgDef = renderer.GetImageDefinition(binary);
+                if (!imgDef)
+                    throw new Error('Unrecognised image definition');
+
                 canvas.width = imgDef.width;
                 canvas.height = imgDef.height;
 
@@ -155,18 +170,35 @@
                 const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                 renderer.RenderToImageData(binary, imageData);
                 context.putImageData(imageData, 0, 0);
+                return true;
             } catch (exception) {
                 console.error(`Unable to render ${url}`, exception);
+                return false;
             }
         }
 
         function loadIndex() {
-            r.getAsTextLines(dir + '_list.txt')
-                .then(text => screenList = text.map(l => ({
-                    filename: l,
-                    title: l.slice(0, -4).replace(/([^A-Z0-9][A-Z])/g, ' $1').trim()
-                }))
-                );
+            r.getAsTextLines(indexUrl + '_list.txt')
+                .then(text => {
+                    screenList = toItems(text, indexUrl);
+                })
+                .catch(error => {
+                    console.warn('Unable to load the remote screen index, falling back to the bundled samples.', error);
+                    screenList = toItems(samples, '/samples/');
+                })
+                .then(() => {
+                    if (filterInput.value)
+                        renderFiltered();
+                });
+        }
+
+        function toItems(filenames, baseUrl) {
+            return filenames.map(filename => ({
+                filename: filename,
+                url: baseUrl + filename,
+                title: filename.slice(0, -4).replace(/([^A-Z0-9][A-Z])/g, ' $1').trim(),
+                score: 0
+            }));
         }
     });
   </script>
