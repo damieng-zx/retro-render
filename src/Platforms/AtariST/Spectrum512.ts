@@ -11,6 +11,7 @@ const Scanlines = 199;
 const PalettesPerScanline = 3;
 const ColorsPerPalette = 16;
 const ColorsPerScanline = PalettesPerScanline * ColorsPerPalette;
+const ScreenBytes = 320 * 200 / 2;
 
 export class Spectrum512 implements ImageFileFormat {
     public GetFileExtensions(): string[] {
@@ -60,15 +61,20 @@ export class Spectrum512 implements ImageFileFormat {
         let y = 0;
         let absIndex = 0;
         const getColor = (index: number) => {
-            const lineIndex = Spectrum512.GetPaletteScanlineEntry(x++, index);
-            if (x === 320) {
+            const colorIndex = absIndex + Spectrum512.GetPaletteScanlineEntry(x, index);
+            // Use the palette row of the scanline being drawn, then advance.
+            // Advancing first made the final pixel read row 199, which does not exist.
+            if (++x === 320) {
                 x = 0;
                 absIndex = y++ * ColorsPerScanline;
             }
-            return palette[absIndex + lineIndex];
+            return palette[colorIndex];
         }
 
-        AtariST.RenderLowResolution(buffer, imageData, getColor);
+        // Only the first 32000 bytes are the screen; the rest is palette data.
+        // RenderLowResolution walks the whole buffer it is handed, so passing
+        // the full file would render past the image and run off the palette.
+        AtariST.RenderLowResolution(buffer.slice(0, ScreenBytes), imageData, getColor);
     }
 
     private static paletteSlide = [ 1, 5, 21, 25, 41, 45, 61, 65, 81, 85, 101, 105, 121, 125, 141, 145 ];
