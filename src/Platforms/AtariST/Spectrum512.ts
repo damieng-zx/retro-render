@@ -80,12 +80,14 @@ export class Spectrum512 implements ImageFileFormat {
     private static paletteSlide = [ 1, 5, 21, 25, 41, 45, 61, 65, 81, 85, 101, 105, 121, 125, 141, 145 ];
 
     public static GetPaletteScanlineEntry(x: number, c: number): number {
-        // Some kind of sliding window for the palette
+        // Some kind of sliding window for the palette.
+        // The original algorithm uses inclusive comparisons: a colour changes
+        // exactly at x1 and again at x1 + 160, not one pixel after.
         const x1 = Spectrum512.paletteSlide[c];
-        if (x > x1 + 160)
+        if (x >= x1 + 160)
             return c + 32;
-        if (x > x1)
-             return c + 16;
+        if (x >= x1)
+            return c + 16;
         return c;
     }
 
