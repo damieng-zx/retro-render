@@ -6,14 +6,16 @@ enum Offset {
     Flag,
     Resolution = 2,
     Palette = 4,
-    Filename = 20,
-    AnimationLimits = 32,
-    AnimationSpeed = 34,
-    ColorSteps = 36,
-    OffsetX = 38,
-    OffsetY = 40,
-    Width = 42,
-    Height = 44,
+    // The palette is 16 words, so everything from the filename on sits 16
+    // bytes later than the palette start.
+    Filename = 36,
+    AnimationLimits = 48,
+    AnimationSpeed = 50,
+    ColorSteps = 52,
+    OffsetX = 54,
+    OffsetY = 56,
+    Width = 58,
+    Height = 60,
     Screen = 128
 }
 
@@ -30,8 +32,10 @@ const offsetChecks = new Array<OffsetCheck>(
     new OffsetCheck("resolution", Offset.Resolution, (w) => w <= 2),
     new OffsetCheck("offsetX is 0", Offset.OffsetX, (w) => w === 0),
     new OffsetCheck("offsetY is 0", Offset.OffsetY, (w) => w === 0),
-    new OffsetCheck("width is 320", Offset.Width, (w) => w === 320),
-    new OffsetCheck("height is 200", Offset.Height, (w) => w === 200),
+    // The width/height words are documented as unused (always 320/200), but
+    // plenty of files leave them zeroed.
+    new OffsetCheck("width is 320 or unset", Offset.Width, (w) => w === 320 || w === 0),
+    new OffsetCheck("height is 200 or unset", Offset.Height, (w) => w === 200 || w === 0),
 )
 
 export class NEOchrome implements ImageFileFormat {
@@ -69,7 +73,7 @@ export class NEOchrome implements ImageFileFormat {
         map.set('filename', dv.getAsciiFixed(Offset.Filename, 12));
         map.set('colorSteps', dv.getInt16(Offset.ColorSteps).toString());
         map.set('offsetX', dv.getInt16(Offset.OffsetX).toString());
-        map.set('offsetY', dv.getInt16(Offset.OffsetX).toString());
+        map.set('offsetY', dv.getInt16(Offset.OffsetY).toString());
         map.set('width', dv.getInt16(Offset.Width).toString());
         map.set('height', dv.getInt16(Offset.Height).toString());
 
