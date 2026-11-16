@@ -1,6 +1,7 @@
 node_modules/
 dist/
 yarn.lock
+pnpm-debug.log*
 samples/
 .vs/slnx.sqlite
 .vs/retro-render/v15/.suo

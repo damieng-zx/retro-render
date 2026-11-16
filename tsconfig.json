@@ -1,20 +1,18 @@
 {
-    "compilerOptions": {
-        "module": "system",
-        "target": "es6",
-        "outFile": "dist/combined.js",
-        "lib": [ "es6", "dom"],
-        "sourceMap": true,
-        "rootDir": "src",
-        "declaration": true,
-        "removeComments": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "noImplicitAny": true,
-    },
-    "exclude": [
-        "node_modules",
-        "dist"
-    ],
-    "compileOnSave": true
+  "compilerOptions": {
+    "module": "system",
+    "target": "es6",
+    "lib": ["es6", "dom"],
+    "outFile": "dist/combined.js",
+    "sourceMap": true,
+    "rootDir": "src",
+    "declaration": true,
+    "removeComments": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "types": []
+  },
+  "exclude": ["node_modules", "dist"],
+  "compileOnSave": true
 }
